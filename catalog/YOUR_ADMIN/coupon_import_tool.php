@@ -57,6 +57,7 @@
           case 'groupon':
             $coupons = fopen($_FILES['upload']['tmp_name'], r);
             $products = $_POST['products'];
+            $categories = $_POST['categories'];
             $counter = 0;
             while (($line = fgetcsv($coupons)) !== FALSE) {
               $counter++;
@@ -100,6 +101,12 @@
                                                    'coupon_restrict' => 'N');
                   zen_db_perform(TABLE_COUPON_RESTRICT, $sql_data_restrict_array);
                 }
+                foreach ($categories as $categories_id) {
+                  $sql_data_restrict_array = array('coupon_id' => $insert_id,
+                                                   'category_id' => $categories_id,
+                                                   'coupon_restrict' => 'N');
+                  zen_db_perform(TABLE_COUPON_RESTRICT, $sql_data_restrict_array);                  
+                }
               }
             }
             break;
@@ -112,6 +119,7 @@
             } else {
               $coupons = explode(',', $coupons);
               $products = $_POST['products'];
+              $categories = $_POST['categories'];
               foreach($coupons as $coupon_code) {
                 $sql_data_array = array('coupon_code' => zen_db_prepare_input($coupon_code),
                                         'coupon_amount' => zen_db_prepare_input($_POST['discount_amount']),
@@ -140,6 +148,12 @@
                                                    'coupon_restrict' => 'N');
                   zen_db_perform(TABLE_COUPON_RESTRICT, $sql_data_restrict_array);
                 }
+                foreach ($categories as $categories_id) {
+                  $sql_data_restrict_array = array('coupon_id' => $insert_id,
+                                                   'category_id' => $categories_id,
+                                                   'coupon_restrict' => 'N');
+                  zen_db_perform(TABLE_COUPON_RESTRICT, $sql_data_restrict_array);                  
+                }                
               } 
             }
             break;
@@ -153,8 +167,20 @@
       $products = $db->Execute("SELECT p.products_id, pd.products_name FROM " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd 
                                 WHERE p.products_id = pd.products_id
                                 AND p.products_status = 1
-                                AND p.product_is_call = 0  
+                                AND p.product_is_call = 0
+                                AND pd.language_id = " . (int)$_SESSION['languages_id'] . "  
                                 ORDER BY pd.products_name ASC;");
+      // build list of categories
+      $categories_query = "SELECT c.categories_id, cd.categories_name FROM " . TABLE_CATEGORIES . " c, " . TABLE_CATEGORIES_DESCRIPTION . " cd
+                           WHERE c.categories_id = cd.categories_id
+                           AND c.categories_status = 1
+                           AND cd.language_id = " . (int)$_SESSION['languages_id'] . "
+                           ORDER BY cd.categories_name ASC;";
+      
+      if (defined('TAGS_MASTER_CATEGORY_ID') && TAGS_MASTER_CATEGORY_ID > 0) {
+        $categories_query = str_replace('WHERE', 'WHERE c.categories_id <> ' . (int)TAGS_MASTER_CATEGORY_ID . ' AND c.parent_id <> ' . (int)TAGS_MASTER_CATEGORY_ID . ' AND ', $categories_query);
+      }
+      $categories = $db->Execute($categories_query);
   }
 ?> 
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -226,19 +252,32 @@ label.discountTypes {width: auto !important; font-weight: normal !important;}
     <?php echo zen_draw_file_field('upload'); ?>
     <br />
     
-    <label for="products"><?php echo LABEL_PRODUCTS; ?></label>
     <?php
       if ($products->RecordCount() > 0) {
+        echo '<label for="products">' . LABEL_PRODUCTS . '</label>' . "\n";
         $products_size = ($products->RecordCount() > 10 ? 10 : $products->RecordCount()); 
         echo '<select name="products[]" multiple="multiple" size="' . $products_size . '">' . "\n";
         while (!$products->EOF) {
-          echo '<option value="' . $products->fields['products_id'] . '">' . zen_get_products_name($products->fields['products_id']) . '</option>' . "\n";
+          echo '<option value="' . $products->fields['products_id'] . '">' . $products->fields['products_name'] . '</option>' . "\n";
           $products->MoveNext();
         }
-        echo '</select>' . "\n";
+        echo '</select><br />' . "\n";
       }
     ?>
-    <br />
+    <?php
+      if ($categories->RecordCount() > 0) {
+        echo '<label for="categories">' . LABEL_CATEGORIES . '</label>' . "\n";
+        $categories_size = ($categories->RecordCount() > 10 ? 10 : $categories->RecordCount()); 
+        /*
+        echo '<select name="categories[]" multiple="multiple" size="' . $categories_size . '">' . "\n";
+        while (!$categories->EOF) {
+          echo '<option value="' . $categories->fields['categories_id'] . '">' . $categories->fields['categories_name'] . '</option>' . "\n";
+          $categories->MoveNext();
+        }*/
+        echo zen_draw_pull_down_menu('categories[]', zen_get_category_tree('', '', '0', '', '', true, false, array(TAGS_MASTER_CATEGORY_ID)), '', 'multiple="multiple" size="' . $categories_size . '"');
+        echo '</select><br />' . "\n";        
+      }
+    ?>
     
     <label for="discount_amount"><?php echo LABEL_DISCOUNT_AMOUNT; ?></label>
     <?php echo zen_draw_input_field('discount_amount', '', 'size=10 id="discount_amount"'); ?>
