@@ -14,9 +14,9 @@ if (!defined('IS_ADMIN_FLAG')) {
 }
 
 $module_constant = 'COUPON_IMPORT_TOOL_VERSION'; // This should be a UNIQUE name followed by _VERSION for convention
-$module_installer_directory = DIR_FS_ADMIN . 'includes/installers/init_coupon_import_tool'; // This is the directory your installer is in, usually this is lower case
+$module_installer_directory = DIR_FS_ADMIN . 'includes/installers/coupon_import_tool'; // This is the directory your installer is in, usually this is lower case
 $module_name = "Coupon Import Tools"; // This should be a plain English or Other in a user friendly way
-$zencart_com_plugin_id = 0; // from zencart.com plugins - Leave Zero not to check
+$zencart_com_plugin_id = 2031; // from zencart.com plugins - Leave Zero not to check
 //Just change the stuff above... Nothing down here should need to change
 
 
