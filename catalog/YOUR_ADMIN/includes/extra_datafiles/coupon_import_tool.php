@@ -10,3 +10,4 @@
 
 define('FILENAME_COUPON_IMPORT_TOOL', 'coupon_import_tool');
 define('BOX_COUPON_IMPORT_TOOL', 'Import Coupons');
+define('BOX_CONFIGURATION_COUPON_IMPORT_TOOLS','Configure Coupon Import Tools');
