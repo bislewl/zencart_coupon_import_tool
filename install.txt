@@ -1,0 +1,7 @@
+Coupon Import Tool
+
+1.) BACKUP BACKUP BACKUP
+2.) Rename YOUR_ADMIN/ to match your admin directory
+3.) Upload The files, preserving the file structure
+4.) Load the Admin the module will self install
+
