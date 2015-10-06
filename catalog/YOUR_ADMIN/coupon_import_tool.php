@@ -56,8 +56,8 @@
         switch($_POST['type']) {
           case 'groupon':
             $coupons = fopen($_FILES['upload']['tmp_name'], r);
-            $products = $_POST['products'];
-            $categories = $_POST['categories'];
+            $products = zen_db_prepare_input($_POST['products']);
+            $categories = zen_db_prepare_input($_POST['categories']);
             $counter = 0;
             while (($line = fgetcsv($coupons)) !== FALSE) {
               $counter++;
